@@ -21,8 +21,8 @@ namespace {
 } while(0)
 
 extern void film_grain_rendering(
-    float * d_dst,
-    const float * d_src,
+    float * __restrict__ d_dst,
+    const float * __restrict__ d_src,
     int width,
     int height,
     int stride,
@@ -31,12 +31,12 @@ extern void film_grain_rendering(
     float grain_radius_std,
     float sigma,
     int seed,
-    const float * d_lambda,
-    const float * d_exp_lambda,
-    const float * d_x_gaussian,
-    const float * d_y_gaussian,
+    const float * __restrict__ d_lambda,
+    const float * __restrict__ d_exp_lambda,
+    const float * __restrict__ d_x_gaussian,
+    const float * __restrict__ d_y_gaussian,
     cudaStream_t stream
-);
+) noexcept;
 
 struct FGrainData {
     VSNodeRef * node;
