@@ -1,0 +1,85 @@
+name: Build (Windows)
+
+on:
+  push:
+    paths:
+      - 'source/*'
+      - '.github/workflows/windows.yml'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'which tag to upload to'
+        default: ''
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Setup Ninja
+      run: pip install ninja
+
+    - name: Cache CUDA
+      id: cache-cuda
+      uses: actions/cache@v2
+      with:
+        path: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA
+        key: ${{ runner.os }}-cuda-11.6.2
+
+    - name: Setup CUDA
+      if: steps.cache-cuda.outputs.cache-hit != 'true'
+      run: |
+        curl -s -o cuda_installer.exe -L https://developer.download.nvidia.com/compute/cuda/11.6.2/network_installers/cuda_11.6.2_windows_network.exe
+        cuda_installer.exe -s nvcc_11.6 cudart_11.6
+
+    - name: Download VapourSynth headers
+      run: |
+        curl -s -o vs.zip -L https://github.com/vapoursynth/vapoursynth/archive/refs/tags/R57.zip
+        unzip -q vs.zip
+        mv vapoursynth-*/ vapoursynth/
+
+    - name: Configure
+      run: cmake -S . -B build -G Ninja -LA
+        -D CMAKE_BUILD_TYPE=Release
+        -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+        -D VS_INCLUDE_DIR="%cd%\vapoursynth\include"
+        -D CMAKE_CXX_FLAGS="/fp:fast /arch:AVX"
+        -D CMAKE_CUDA_FLAGS="--threads 0 --use_fast_math --resource-usage -Wno-deprecated-gpu-targets"
+        -D CMAKE_CUDA_ARCHITECTURES="50;61-real;75-real;86"
+      env:
+        CUDA_PATH: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6
+
+    - name: Build
+      run: cmake --build build --verbose
+
+    - name: Install
+      run: cmake --install build --prefix install
+
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: vs-fgrain-cuda-windows
+        path: install/bin/*.dll
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: github.event_name == 'workflow_dispatch' && github.event.inputs.tag != ''
+      with:
+        tag_name: ${{ github.event.inputs.tag }}
+        files: install/bin/*
+        fail_on_unmatched_files: true
+        generate_release_notes: false
+        prerelease: true
+
