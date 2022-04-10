@@ -55,7 +55,6 @@ jobs:
         -D CMAKE_BUILD_TYPE=Release
         -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
         -D VS_INCLUDE_DIR="%cd%\vapoursynth\include"
-        -D CMAKE_CXX_FLAGS="/fp:fast /arch:AVX"
         -D CMAKE_CUDA_FLAGS="--threads 0 --use_fast_math --resource-usage -Wno-deprecated-gpu-targets"
         -D CMAKE_CUDA_ARCHITECTURES="50;61-real;75-real;86"
       env:

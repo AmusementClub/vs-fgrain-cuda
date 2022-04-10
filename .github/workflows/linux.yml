@@ -45,7 +45,7 @@ jobs:
       run: cmake -S . -B build -G Ninja -LA
         -D CMAKE_BUILD_TYPE=Release
         -D VS_INCLUDE_DIR="`pwd`/vapoursynth/include"
-        -D CMAKE_CXX_FLAGS_RELEASE="-ffast-math -march=x86-64-v3"
+        -D CMAKE_CXX_FLAGS_RELEASE="-Wall"
         -D CMAKE_CUDA_FLAGS="--threads 0 --use_fast_math --resource-usage -Wno-deprecated-gpu-targets"
         -D CMAKE_CUDA_ARCHITECTURES="50;61-real;75-real;86"
       env:
