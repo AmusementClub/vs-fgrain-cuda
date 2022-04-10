@@ -12,7 +12,9 @@ Currently only grays is supported.
 [CUDA](https://developer.nvidia.com/cuda-downloads) is required.
 
 ```bash
-cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_CUDA_ARCHITECTURES="52;61-real;75-real;86-real" -D CMAKE_CUDA_FLAGS="--threads 0 --use_fast_math"
+cmake -S . -B build -D CMAKE_BUILD_TYPE=Release \
+-D CMAKE_CUDA_ARCHITECTURES="52;61-real;75-real;86-real" \
+-D CMAKE_CUDA_FLAGS="--threads 0 --use_fast_math"
 
 cmake --build build
 
