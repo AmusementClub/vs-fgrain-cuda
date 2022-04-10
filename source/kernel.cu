@@ -189,7 +189,7 @@ void film_grain_rendering(
     cudaStream_t stream
 ) noexcept {
 
-    constexpr dim3 block { 32, 4 };
+    const dim3 block { 32, 4 };
 
     const dim3 grid {
         (width + block.x - 1) / block.x,
