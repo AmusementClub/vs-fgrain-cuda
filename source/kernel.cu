@@ -119,7 +119,7 @@ static float render_pixel(
 
                 int px = fminf(fmaxf(/*floorf*/roundf(cell_corner.x), 0.0f), width - 1);
                 int py = fminf(fmaxf(/*floorf*/roundf(cell_corner.y), 0.0f), height - 1);
-                int index = __float2int_rz(src[py * stride + px] * 255.1f);
+                int index = max(0, min(__float2int_rz(src[py * stride + px] * 255.1f), 255));
 
                 int n_cell = my_rand_poisson(p, lambda[index], exp_lambda[index]);
 
