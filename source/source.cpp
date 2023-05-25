@@ -101,6 +101,13 @@ static const VSFrameRef * VS_CC fgrainGetFrame(
             return nullptr;
         };
 
+        auto src_props = vsapi->getFramePropsRO(src_frame);
+        int error;
+        auto seed_offset = int64ToIntS(vsapi->propGetInt(src_props, "FGRAIN_SEED_OFFSET", 0, &error));
+        if (error) {
+            seed_offset = 0;
+        }
+
         const auto * srcp = vsapi->getReadPtr(src_frame, 0);
         auto src_pitch = vsapi->getStride(src_frame, 0);
 
@@ -116,7 +123,7 @@ static const VSFrameRef * VS_CC fgrainGetFrame(
             d->d_dst, d->d_src,
             vi->width, vi->height, d->d_pitch / sizeof(float),
             d->num_iterations, d->grain_radius_mean, d->grain_radius_std, d->sigma,
-            d->seed, d->d_lambda, d->d_exp_lambda, d->d_x_gaussian, d->d_y_gaussian, d->stream);
+            d->seed + seed_offset, d->d_lambda, d->d_exp_lambda, d->d_x_gaussian, d->d_y_gaussian, d->stream);
 
         checkError(cudaMemcpy2DAsync(
             d->h_dst, d->d_pitch,
