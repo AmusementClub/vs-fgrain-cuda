@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -33,16 +33,16 @@ jobs:
 
     - name: Cache CUDA
       id: cache-cuda
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA
-        key: ${{ runner.os }}-cuda-11.6.2
+        key: ${{ runner.os }}-cuda-11.8.0
 
     - name: Setup CUDA
       if: steps.cache-cuda.outputs.cache-hit != 'true'
       run: |
-        curl -s -o cuda_installer.exe -L https://developer.download.nvidia.com/compute/cuda/11.6.2/network_installers/cuda_11.6.2_windows_network.exe
-        cuda_installer.exe -s nvcc_11.6 cudart_11.6
+        curl -s -o cuda_installer.exe -L https://developer.download.nvidia.com/compute/cuda/11.8.0/network_installers/cuda_11.8.0_windows_network.exe
+        cuda_installer.exe -s nvcc_11.8 cudart_11.8
 
     - name: Download VapourSynth headers
       run: |
@@ -56,9 +56,9 @@ jobs:
         -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
         -D VS_INCLUDE_DIR="%cd%\vapoursynth\include"
         -D CMAKE_CUDA_FLAGS="--threads 0 --use_fast_math --resource-usage -Wno-deprecated-gpu-targets"
-        -D CMAKE_CUDA_ARCHITECTURES="50;61-real;75-real;86"
+        -D CMAKE_CUDA_ARCHITECTURES="50;61-real;75-real;86-real;89-real"
       env:
-        CUDA_PATH: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6
+        CUDA_PATH: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8
 
     - name: Build
       run: cmake --build build --verbose
@@ -67,7 +67,7 @@ jobs:
       run: cmake --install build --prefix install
 
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: vs-fgrain-cuda-windows
         path: install/bin/*.dll

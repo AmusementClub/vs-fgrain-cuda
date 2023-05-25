@@ -9,28 +9,22 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
-
-    - name: Setup GCC
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y g++-11
 
     - name: Setup Ninja
       run: pip install ninja
 
-    - name: Setup CUDA and OpenCL
+    - name: Setup CUDA
       run: |
-        wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
-        sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-        sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
-        sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /"
-        sudo apt-get install -y cuda-nvcc-11-6 cuda-cudart-dev-11-6
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+        sudo dpkg -i cuda-keyring_1.1-1_all.deb
+        sudo apt-get update
+        sudo apt-get install -y cuda-nvcc-11-8 cuda-cudart-dev-11-8
         echo "PATH=/usr/local/cuda/bin${PATH:+:${PATH}}" >> $GITHUB_ENV
         echo "CUDA_PATH=/usr/local/cuda" >> $GITHUB_ENV
         echo "LD_LIBRARY_PATH=/usr/local/cuda/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" >> $GITHUB_ENV
@@ -47,9 +41,7 @@ jobs:
         -D VS_INCLUDE_DIR="`pwd`/vapoursynth/include"
         -D CMAKE_CXX_FLAGS_RELEASE="-Wall"
         -D CMAKE_CUDA_FLAGS="--threads 0 --use_fast_math --resource-usage -Wno-deprecated-gpu-targets"
-        -D CMAKE_CUDA_ARCHITECTURES="50;61-real;75-real;86"
-      env:
-        CXX: g++-11
+        -D CMAKE_CUDA_ARCHITECTURES="50;61-real;75-real;86-real;89-real"
 
     - name: Build
       run: cmake --build build --verbose
@@ -57,9 +49,9 @@ jobs:
     - name: Install
       run: cmake --install build --prefix install
 
-    # - name: Upload
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: vs-fgrain-cuda-Linux
-    #     path: install/lib/*.so
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: vs-fgrain-cuda-Linux
+        path: install/lib/*.so
 
